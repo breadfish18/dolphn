@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <!-- Primary Meta Tags -->
+    <title>Dolphn</title>
+    <meta name="title" content="Dolphn">
+    <meta name="description" content="Free high quality voice & text chat.">
+    <meta name="theme-color" content="#1787FF">
+
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://dolphn.app/">
+    <meta property="og:title" content="Dolphn">
+    <meta property="og:description" content="Free high quality voice & text chat.">
+    <meta property="og:image" content="/assets/logo.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary">
+    <meta property="twitter:url" content="https://dolphn.app/">
+    <meta property="twitter:title" content="Dolphn">
+    <meta property="twitter:description" content="Free high quality voice & text chat.">
+    <meta property="twitter:image" content="/assets/logo.png">
+
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.2/animate.min.css">
+
+    <link rel="stylesheet" href="/css/loading.css">
+    <link rel="stylesheet" href="/css/chat.css">
+
+    <link rel="shortcut icon" href="/assets/favicon.ico">
+
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/peerjs@0.3.20/dist/peer.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+    <script src="https://unpkg.com/marked@0.5.2/lib/marked.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://momentjs.com/downloads/moment.js"></script>
+
+    <!-- <script src="/js/socket.js" async></script> -->
+    <script src="/js/chat_new.js" async></script>
+
+    <script type="x/template" id="modal-template">
+        <transition name="modal">
+            <div class="modal-mask" @click="close" v-show="show">
+                <div class="modal-container" @click.stop>
+                  <slot></slot>
+                </div>
+            </div>
+        </transition>
+    </script>
+
+    <script type="x/template" id="new-server-modal-template">
+        <modal :show="show" @close="close">
+            <div class="modal-header">
+                <h3>Create a new server</h3>
+            </div>
+            <div class="modal-body">
+                <label class="form-label">
+                    Server name
+                    <input v-model="title" class="form-control">
+                </label>
+            </div>
+            <div class="modal-footer text-right">
+                <button class="cancel-button" @click="close()">
+                    Cancel
+                </button>
+                <button class="create-button" @click="createServer()">
+                    Create
+                </button>
+            </div>
+        </modal>
+    </script>
+
+    <script type="x/template" id="new-channel-modal-template">
+        <modal :show="show" @close="close">
+            <div class="modal-header">
+                <h3>Create a new channel</h3>
+            </div>
+            <div class="modal-body">
+                <label class="form-label">
+                    Channel name
+                    <input v-model="title" class="form-control">
+                </label>
+            </div>
+            <div class="modal-footer text-right">
+                <button class="cancel-button" @click="close()">
+                    Cancel
+                </button>
+                <button class="create-button" @click="createChannel()">
+                    Create
+                </button>
+            </div>
+        </modal>
+    </script>
+
+    <script type="x/template" id="profile-modal-template">
+        <modal :show="show" @close="close">
+            <div class="modal-header">
+                <h3>Create a new channel</h3>
+            </div>
+            <div class="modal-body">
+                <label class="form-label">
+                    Channel name
+                    <input v-model="title" class="form-control">
+                </label>
+            </div>
+            <div class="modal-footer text-right">
+                
+            </div>
+        </modal>
+    </script>
+</head>
+
+<body>
+    <main id="app">
+        <!-- <div id="1" class="modal-content animated zoomIn faster none">
+            <div class="caller">
+                <p class="is-128x128">
+                    <img class="is-rounded" v-bind:src="getImageUrl(id)" @error="imageUrlAlt" v-on:click="call(user.id)">
+                </p>
+                <h3>Username</h3>
+                <h4>is calling you</h4>
+            </div>
+            <button class="answer-call">Answer</button>
+            <button class="decline-call">Decline</button>
+        </div>
+        <div id="2" class="modal-content animated zoomIn faster none">
+            <div class="title">Create a new channel</div>
+            <div class="new-descriptor">Channel name</div>
+            <input type="text" class="name-input">
+            <div class="new-descriptor">Description</div>
+            <textarea class="desc-input" rows="2"></textarea>
+            <div class="bottom">
+                <button class="cancel-button" @click="closeModal('2')">Cancel</button><button class="create-button" @click="createChannel">Create</button>
+            </div>
+        </div> -->
+        <!-- <div class="modal-darken animated fadeIn faster none"></div> -->
+        <div class="window-title-bar">
+            <h3 class="window-name">DOLPHN</h3>
+        </div>
+        <div class="wrap">
+            <div class="server-panel">
+                <div class="server">
+                    <p class="is-48x48">
+                        <img class="is-rounded" src="/assets/friend-panel.svg">
+                    </p>
+                </div>
+                <div class="server-divider"></div>
+                <div class="server" v-for="server in servers" @click="setServer(server.id)">
+                    <p class="is-48x48">
+                        <img class="is-rounded" src="/assets/avatar.png">
+                    </p>
+                </div>
+                <div class="server" @click="showNewServerModal = true">
+                    <p class="is-48x48">
+                        <img class="is-rounded" src="/assets/add.svg">
+                    </p>
+                </div>
+            </div>
+            <new-server-modal :show="showNewServerModal" @close="showNewServerModal = false"></new-server-modal>
+            <new-channel-modal :show="showNewChannelModal" @close="showNewChannelModal = false"></new-channel-modal>
+            <div class="left-panel animated faster">
+                <div class="server-card">
+                    <h3 v-if="selectedServer" class="server-name">{{selectedServer.name}}</h3>
+                </div>
+                <!-- <h3 class="friends-name">Online</h3>
+                    <div class="divider"></div>
+                    <div class="friends">
+                        <div v-for="user in online" v-bind:message-id="user.id" class="friend">
+                            <p class="is-48x48">
+                                <img class="is-rounded" v-bind:src="getImageUrl(user.id)" @error="imageUrlAlt" v-on:click="call(user.id)">
+                            </p>
+                            <h3>{{ user.name }}</h3>
+                        </div>
+                    </div>
+                    <h3 class="friends-name">Offline</h3>
+                    <div class="divider"></div>
+                    <div class="friends">
+                        <div v-for="user in offline" class="friend">
+                            <p class="is-48x48">
+                                <img class="is-rounded" v-bind:src="getImageUrl(user.id)" @error="imageUrlAlt">
+                            </p>
+                            <h3>{{ user.name }}</h3>
+                        </div>
+                    </div> -->
+                <!-- <h3 class="friends-name">Servers</h3>
+                <div class="divider"></div>
+                <div class="friends">
+                    <div v-for="server in servers" class="friend">
+                        <p class="is-48x48">
+                            <img class="is-rounded" v-bind:src="getImageUrl(server.id)" @error="imageUrlAlt">
+                        </p>
+                        <h3>{{ server.name }}</h3>
+                    </div>
+                </div> -->
+                <div>
+                    <h3 class="friends-name">Channels</h3>
+                    <span @click="showNewChannelModal = true">
+                        <svg class="plus" fill="none" stroke="white" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <line x1="12" x2="12" y1="5" y2="19" />
+                            <line x1="5" x2="19" y1="12" y2="12" />
+                        </svg>
+                    </span>
+                </div>
+                <div v-if="selectedServer" class="channels">
+                    <div class="channel" v-for="channel in selectedServer.channels" v-bind:class="{selected: channel.id === selectedChannelId}" @click="setChannel(channel.id)">
+                        <h3>#{{channel.name}}</h3>
+                    </div>
+                </div>
+            </div>
+            <!-- <div class="top-bar">
+
+            </div> -->
+            <div class="center-panel" id="test">
+                <div class="messages">
+                    <span class="la-ball-atom loading">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    </span>
+                    <div class="message-container" v-for="message in messages">
+                        <div v-if="showExtras(message)" class="messages-divider"></div>
+                        <!-- v-if="showExtras(message.id) && currentChannel.messages[0].id !== message.id" -->
+                        <!-- v-bind:class="{ 'no-extra': !showExtras(message.id) }" -->
+                        <article v-bind:message-id="message.id" class="message" v-bind:class="{ 'no-extra': !showExtras(message) }">
+                            <figure class="message-avatar" v-if="showExtras(message)">
+                                <p class="is-40x40">
+                                    <img class="is-rounded" src="/assets/avatar.png">
+                                </p>
+                            </figure>
+                            <div class="message-content">
+                                <div class="message-username" v-if="showExtras(message)">{{ message.username }}</div>
+                                <div class="timestamp" v-if="showExtras(message)" v-text="formatDate(message.timestamp)"></div>
+                                <div class="message-text" v-if="message.content" v-html="compiledMarkdown(message.content)"></div>
+                                <br v-if="!message.content">
+                                <iframe class="message-video" v-if="/(http\:\/\/)?(www\.youtube\.com|youtu\.?be)\/.+$/.test(message.content) && !message.image" width="460" height="258" v-bind:src="'http://www.youtube-nocookie.com/embed/' +  message.content.split('/').pop().replace('watch?v=', '') + '?modestbranding=1&showinfo=0&rel=0&color=white'" frameborder="0" allow="accelerometer; autoplay; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                                <img v-if="message.image" v-bind:src="'https://cdn.dolphn.app/messages/' + message.image" v-on:load="scroll" class="message-image">
+                            </div>
+                        </article>
+                    </div>
+                </div>
+                <div class="area-divider"></div>
+                <div class="area-container">
+                    <!-- <form ref='uploadForm' id='uploadForm' action='http://localhost/api/uploadimages' method='post' encType="multipart/form-data"> -->
+                    <!-- <input type="file" id="image-up" required accept="image/png, image/jpeg" ref="file" @change="uploadImg" /> -->
+                    <!-- <svg @click="uploadPromptImg" fill="none" stroke="#1787FF" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="12" x2="12" y1="8" y2="16" />
+                            <line x1="8" x2="16" y1="12" y2="12" />
+                        </svg> -->
+                    <textarea type="text" rows="1" @keypress="keypress" class="type-area" placeholder="Send a message"></textarea>
+
+                </div>
+            </div>
+            <div class="right-panel animated faster">
+                <article class="self">
+
+                    <div class="self-text">
+                        <div class="self-username">{{ username }}</div>
+                        <div class="self-status">
+                            online
+                        </div>
+                    </div>
+                    <figure class="self-avatar is-48x48">
+                        <!-- <form ref='uploadForm' id='uploadForm' action='http://localhost/api/uploadavatar' method='post' encType="multipart/form-data"> -->
+                        <!-- <input type="file" id="avatar-up" required accept="image/png, image/jpeg" ref="file" @change="upload" /> -->
+                        <!-- @click="uploadPrompt" -->
+                        <img class="avatar-img is-rounded" id="self-avatar" src="/assets/avatar.png">
+                        <!-- </form> -->
+                    </figure>
+                </article>
+                <audio id="call" autoplay></audio>
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>
