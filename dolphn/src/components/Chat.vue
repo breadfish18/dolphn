@@ -68,7 +68,7 @@ import io from "socket.io-client";
 import Peer from "peerjs";
 
 const token = localStorage.getItem("token");
-// if (!token) window.location.replace("/login");
+if (!token) window.location.replace("/login");
 const id = atob(token).split(".")[0];
 
 console.log(id)
@@ -448,8 +448,8 @@ export default {
     },
     mounted: async function () {
         await this.login().catch(() => {
-            // localStorage.removeItem("token");
-            // location.replace("/login");
+            localStorage.removeItem("token");
+            location.replace("/login");
         });
         this.$store.commit("setState", { k: "username", v: await this.getUsername(id) })
         this.$store.commit("setState", { k: "servers", v: await this.getServers() })

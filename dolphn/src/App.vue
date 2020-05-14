@@ -235,7 +235,7 @@ div.new-descriptor:nth-child(1) {
     content: attr(unread);
     font-size: smaller;
     position: absolute;
-    background: #1787ff;
+    background: #18a0fb;
     border-radius: 50%;
     height: 18px;
     width: 18px;
@@ -329,7 +329,7 @@ div.new-descriptor:nth-child(1) {
 }
 
 .badge {
-    background: #1787ff;
+    background: #18a0fb;
     border-radius: 290486px;
     padding-left: 6px;
     padding-right: 6px;
@@ -432,7 +432,7 @@ main {
 
 .answer-call {
     margin-top: 42px;
-    background: #1787ff;
+    background: #18a0fb;
 }
 
 .create-button {
@@ -441,7 +441,7 @@ main {
     margin-right: 12px;
     width: 73px;
     height: 32px;
-    background: #1787ff;
+    background: #18a0fb;
 }
 
 .cancel-button {
@@ -529,8 +529,8 @@ main {
     margin-bottom: -32px;
     background: repeating-linear-gradient(
         -45deg,
-        #1787ff,
-        #1787ff 20px,
+        #18a0fb,
+        #18a0fb 20px,
         #1165bf 20px,
         #1165bf 40px
     );
@@ -663,7 +663,7 @@ main {
     margin-top: 28px;
     width: 24px;
     height: 24px;
-    color: #1787ff;
+    color: #18a0fb;
     cursor: pointer;
 }
 
@@ -856,7 +856,7 @@ figure {
     width: 420px;
     height: 174px;
     margin: 40px auto;
-    background-color: #06070e;
+    background-color: #31394d;
     border-radius: 8px;
     transition: all 0.3s ease;
 }
@@ -864,7 +864,7 @@ figure {
 .modal-footer {
     width: 420px;
     height: 55px;
-    background-color: #040509;
+    background-color: #293040;
     border-radius: 0 0 8px 8px;
     margin-top: 19px;
     transition: all 0.3s ease;
@@ -909,7 +909,7 @@ figure {
     width: 368px;
     height: 36px;
     line-height: 36px;
-    background: #040509;
+    background: #2d3345;
     border: 0px;
     border-radius: 8px;
     color: white;

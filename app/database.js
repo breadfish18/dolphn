@@ -8,6 +8,9 @@ class Database {
     async newMessage ({ id, author, content, channel, image, timestamp }) {
         await r.table("messages").insert({ id, author, content, channel, image, timestamp });
     }
+    async createRelationship ({ id, channel, user, recipient }) {
+        return await r.table("relationships").insert({ id, channel, user, recipient })
+    }
     async newChannel ({ id, author, name, desc, server, timestamp }) {
         await r.table("channels").insert({ id, author, name, desc, server, timestamp });
     }
