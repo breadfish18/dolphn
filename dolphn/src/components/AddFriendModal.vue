@@ -11,7 +11,7 @@
         </div>
         <div class="modal-footer text-right">
             <button class="cancel-button" @click="close()">Cancel</button>
-            <button class="create-button" @click="createChannel()">Create</button>
+            <button class="create-button" @click="addFriend()">Create</button>
         </div>
     </Modal>
 </template>
@@ -34,7 +34,7 @@ export default {
             this.$emit('close');
             this.title = '';
         },
-        createChannel: async function () {
+        addFriend: async function () {
             this.$emit('create', this.title)
             this.close();
         }

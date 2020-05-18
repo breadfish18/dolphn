@@ -3,7 +3,7 @@
         <div
             v-if="selectedChannel"
             class="channel-bar"
-        >{{ selectedChannel.name || selectedChannel.username }}</div>
+        >{{ selectedChannel.name || selectedChannel.recipient.username }}</div>
         <div class="messages">
             <span class="la-ball-atom loading">
                 <div></div>

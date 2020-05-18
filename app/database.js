@@ -8,8 +8,8 @@ class Database {
     async newMessage ({ id, author, content, channel, image, timestamp }) {
         await r.table("messages").insert({ id, author, content, channel, image, timestamp });
     }
-    async createRelationship ({ id, channel, user, recipient }) {
-        return await r.table("relationships").insert({ id, channel, user, recipient })
+    async createRelationship ({ id, channel, type, user, recipient }) {
+        return await r.table("relationships").insert({ id, channel, type, user, recipient })
     }
     async newChannel ({ id, author, name, desc, server, timestamp }) {
         await r.table("channels").insert({ id, author, name, desc, server, timestamp });
@@ -20,6 +20,9 @@ class Database {
 
     async updateUser ({ id, username, password, icon, token }) {
         await r.table("users").get(id).update({ username, password, icon, token });
+    }
+    async editRelationship ({ id, channel, type, user, recipient }) {
+        return await r.table("relationships").get(id).update({ channel, type, user, recipient })
     }
     async joinServer (id, server) {
         await r.table("users").get(id).update({
@@ -47,8 +50,12 @@ class Database {
     async getServers (user) {
         return await r.table("servers").filter(s => r.table("users").get(user).getField("servers").contains(s.getField("id")))
     }
+    async getRelationship (id) {
+        return await r.table("relationships").get(id)
+    }
     async getRelationships (user) {
-        return await r.table("relationships").filter({ user })
+        console.log(user)
+        return await r.table("relationships").filter(r.row("user").eq(user).and(r.row("type").eq(2)).or(r.row("recipient").eq(user).and(r.row("type").eq(1))))
     }
     async getMessages (channel) {
         return await r.table("messages").filter({ channel }).orderBy("timestamp");

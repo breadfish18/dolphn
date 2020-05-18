@@ -19,14 +19,17 @@
             </svg>
         </span>
         <div v-if="friends" class="channels">
+            <div class="channel" @click="$parent.openRequests()">
+                <h3>Friend Requests</h3>
+            </div>
             <div
                 class="channel"
-                v-for="friend in friends"
-                v-bind:key="friend.channel"
+                v-for="friend in addedFriends"
+                v-bind:key="friend.id"
                 v-bind:class="{ selected: friend.channel === selectedChannelId }"
                 @click="$parent.setFriend(friend.channel)"
             >
-                <h3>@{{ friend.username }}</h3>
+                <h3>@{{ friend.recipient.username }}</h3>
             </div>
         </div>
     </div>
@@ -44,6 +47,9 @@ export default {
         },
         friends: function () {
             return this.$store.state.friends;
+        },
+        addedFriends: function () {
+            return this.$store.state.friends.filter(f => f.type === 2);
         },
         users: function () {
             return this.$store.state.users;

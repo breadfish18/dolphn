@@ -14,6 +14,7 @@ async function getRelations (req, res) {
     const token = req.headers["authorization"]
     if (!token) return res.sendStatus(403);
 
+    console.log("lo")
     if (!validate.token(token)) return res.sendStatus(403);
     const tokenData = auth.destructToken(token);
     const user = await req.app.database.getUser(tokenData.id);
@@ -25,8 +26,10 @@ async function getRelations (req, res) {
     for (let i = 0; i < relationships.length; i++) {
         const relationship = relationships[i];
         console.log(relationship)
-        const author = await req.app.database.getUser(relationship.recipent)
-        if (author) relationship.username = author.username
+        const recipient = await req.app.database.getUser(relationship.recipient)
+        if (recipient) relationship.recipient = { id: recipient.id, username: recipient.username }
+        const author = await req.app.database.getUser(relationship.user)
+        if (author) relationship.user = { id: author.id, username: author.username }
     }
 
     res.send({ relationships });

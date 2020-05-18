@@ -13,10 +13,9 @@ async function post (req, res) {
 async function postFriendship (req, res) {
     const token = req.headers["authorization"]
     if (!token) return res.sendStatus(403);
-    const target = req.path.split("/").pop()
+    const { name, type } = req.body
 
-    if (!validate.id(id)) return res.send({ ok: false });
-
+    if (!validate.username(name)) return res.sendStatus(400)
     if (!validate.token(token)) return res.sendStatus(403);
     const tokenData = auth.destructToken(token);
     const user = await req.app.database.getUser(tokenData.id);
@@ -25,11 +24,14 @@ async function postFriendship (req, res) {
 
     const id = req.app.snowflake.nextId();
 
-    const friend = await req.app.database.getUser(target);
+    const friend = await req.app.database.getUserByName(name);
     if (!friend) return res.sendStatus(400)
     const channel = req.app.snowflake.nextId();
 
-    let relationships = await req.app.database.createRelationship({ id, channel, user: user.id, recipient: friend.id });
+    // 1: request
+    // 2: friend
+    let relationships = await req.app.database.createRelationship({ id, channel, type, user: user.id, recipient: friend.id });
+
     res.send({ relationships });
 }
 

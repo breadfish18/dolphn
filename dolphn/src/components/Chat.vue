@@ -43,11 +43,12 @@
                 @create="addFriend"
             ></AddFriendModal>
             <LeftPanel v-if="active === 'servers'"></LeftPanel>
-            <Friends v-if="active === 'friends'"></Friends>
+            <Friends v-if="active === 'friends' || active === 'requests'"></Friends>
             <!-- <div class="top-bar">
 
             </div>-->
-            <CenterPanel></CenterPanel>
+            <CenterPanel v-if="active === 'servers' || active === 'friends'"></CenterPanel>
+            <Requests v-if="active==='requests'"></Requests>
             <RightPanel></RightPanel>
         </div>
     </main>
@@ -61,6 +62,7 @@ import AddFriendModal from './AddFriendModal.vue';
 import ServerPanel from './ServerPanel.vue';
 import LeftPanel from './LeftPanel.vue';
 import CenterPanel from './CenterPanel.vue';
+import Requests from './Requests.vue';
 import RightPanel from './RightPanel.vue';
 import Friends from './Friends.vue';
 
@@ -68,7 +70,7 @@ import io from "socket.io-client";
 import Peer from "peerjs";
 
 const token = localStorage.getItem("token");
-if (!token) window.location.replace("/login");
+// if (!token) window.location.replace("/login");
 const id = atob(token).split(".")[0];
 
 console.log(id)
@@ -103,6 +105,7 @@ export default {
         ServerPanel,
         LeftPanel,
         CenterPanel,
+        Requests,
         RightPanel,
         Friends
     },
@@ -362,18 +365,18 @@ export default {
                     .catch((e) => reject(e));
             });
         },
-        addFriend: async function (name, server) {
+        addFriend: async function (name) {
             return new Promise((resolve, reject) => {
-                fetch(`http://localhost/api/servers/${server}/channels`, {
+                fetch(`http://localhost/api/relationships`, {
                     method: "POST",
                     headers: new Headers({
                         "Content-Type": "application/json",
                         Authorization: token,
                     }),
-                    body: JSON.stringify({ name }),
+                    body: JSON.stringify({ name, type: 1 }),
                 })
                     .then((res) => res.json()).then(body => {
-                        if (body && body.id) {
+                        if (body && body.relationships) {
                             return resolve(body);
                         } else {
                             return reject("Error");
@@ -389,6 +392,9 @@ export default {
 
             this.$store.commit("setState", { k: "selectedChannel", v: this.selectedServer.channels.find((channel) => channel.id === this.selectedChannelId) })
             this.$store.commit("setState", { k: "messages", v: await this.getMessages(this.selectedChannelId) })
+        },
+        openRequests: function () {
+            this.$store.commit("setState", { k: "active", v: "requests" })
         },
         setFriend: async function (channel) {
             localStorage.setItem("selectedChannelId", channel);
@@ -433,7 +439,6 @@ export default {
             });
             socket.on("call_peers", async (data) => {
                 for (let i = 0; i < data.peers.length; i++) {
-                    console.log("okay");
                     const peer = data.peers[i];
                     this.playStream(await this.callPeer(peer));
                 }
@@ -447,10 +452,10 @@ export default {
         this.scroll();
     },
     mounted: async function () {
-        await this.login().catch(() => {
-            localStorage.removeItem("token");
-            location.replace("/login");
-        });
+        // await this.login().catch(() => {
+        // localStorage.removeItem("token");
+        // location.replace("/login");
+        // });
         this.$store.commit("setState", { k: "username", v: await this.getUsername(id) })
         this.$store.commit("setState", { k: "servers", v: await this.getServers() })
         this.$store.commit("setState", { k: "friends", v: await this.getFriends() })
@@ -465,9 +470,9 @@ export default {
             localStorage.setItem("selectedChannelId", id);
             this.$store.commit("setState", { k: "selectedChannelId", v: id })
         }
-        this.$store.commit("setState", { k: "selectedServer", v: this.servers.find((server) => server.id === this.selectedServerId) })
+        this.$store.commit("setState", { k: "selectedServer", v: this.servers.find(server => server.id === this.selectedServerId) })
 
-        this.$store.commit("setState", { k: "selectedChannel", v: this.selectedServer.channels.find((channel) => channel.id === this.selectedChannelId) })
+        this.$store.commit("setState", { k: "selectedChannel", v: this.selectedServer.channels.find((channel) => channel.id === this.selectedChannelId) || this.friends.find(friend => friend.channel === this.selectedChannelId) })
 
         this.$store.commit("setState", { k: "messages", v: await this.getMessages(this.selectedChannelId) })
 
